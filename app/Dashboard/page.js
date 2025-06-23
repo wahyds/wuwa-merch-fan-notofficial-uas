@@ -64,42 +64,17 @@ export default function DashboardPage() {
   }
 
   const NavButton = ({ href, icon, label }) => (
-    <Link href={href} className="flex items-center gap-2 border px-3 py-2 rounded shadow hover:bg-gray-100 transition text-sm" onClick={playClickSound}>
+    <Link href={href} onClick={playClickSound} className="flex items-center gap-2 border px-3 py-2 rounded shadow hover:bg-gray-100 transition text-sm">
       <span>{icon}</span>
       <span>{label}</span>
     </Link>
   )
-
-  const talents = [
-    {
-      id: 1,
-      src: '/talent1.mp4',
-      productImage: '/product1.jpg',
-      name: 'Tas Phoebe',
-      price: 'Rp 350.000'
-    },
-    {
-      id: 2,
-      src: '/talent2.mp4',
-      productImage: '/product2.jpg',
-      name: 'Mousepad Romantic Carlotta Packed',
-      price: 'Rp 700.000'
-    },
-    {
-      id: 3,
-      src: '/talent3.mp4',
-      productImage: '/product3.jpg',
-      name: 'Figure Carthethyia Eksklusif',
-      price: 'Rp 1550.000'
-    },
-  ]
 
   return (
     <div className="min-h-screen flex flex-col">
       <audio ref={bgmRef} src="/bgm.mp3" autoPlay loop />
       <audio ref={clickSoundRef} src="/click.mp3" preload="auto" />
 
-      {/* Navbar */}
       <nav className="flex items-center justify-between px-6 py-4 shadow-md bg-white">
         <h1 className="text-2xl font-bold text-red-600">WUTHERING WAVES</h1>
         <div className="md:hidden">
@@ -117,7 +92,7 @@ export default function DashboardPage() {
               <NavButton href="/riwayat" icon="📜" label="Riwayat" />
               <NavButton href="/lacak" icon="📦" label="Lacak" />
               <NavButton href="/chat" icon="💬" label="Pesan" />
-              {isAdmin && <NavButton href="/adminpage" icon="⚙️" label="Admin Panel" />}
+              {isAdmin && <NavButton href="/admin/adminpage" icon="⚙️" label="Admin Panel" />}
               <button onClick={logoutUser} className="text-red-600 font-semibold ml-2">Logout</button>
               {userPhoto && (
                 <Link href="/profile">
@@ -133,8 +108,7 @@ export default function DashboardPage() {
           )}
         </div>
       </nav>
-    
-      {/* Mobile Dropdown */}
+
       {menuOpen && (
         <div className="md:hidden flex flex-col bg-white px-6 py-2 space-y-2 border-b">
           <NavButton href="/cart" icon="🛒" label="Keranjang" />
@@ -168,65 +142,42 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Banner Video */}
       <section className="relative text-white text-center">
         <video src="/bg.mp4" autoPlay muted loop playsInline className="w-full h-[300px] object-cover" />
         <div className="absolute inset-0 bg-black/50 flex flex-col justify-center items-center">
-          <h2 className="text-3xl md:text-4xl font-bold">ROAD TO WUHTERING WAVES FEST</h2>
+          <h2 className="text-3xl md:text-4xl font-bold">ROAD TO WUTHERING WAVES FEST</h2>
           <p className="mt-2 text-lg md:text-xl">Diskon merch sampai 70% + ekstra 30%</p>
           <button className="mt-6 px-6 py-2 bg-white text-red-600 font-bold rounded-full">SHOP NOW</button>
         </div>
       </section>
 
-      {/* Produk Talent */}
       <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-6">
-        {talents.map(({ id, src, productImage, name, price }) => {
-          const videoRef = useRef(null)
-          const [showPopup, setShowPopup] = useState(false)
-
-          return (
-            <div key={id} className="relative group rounded-xl overflow-hidden shadow border">
-              <Link href={`/talent${id}`} onClick={playClickSound}>
-                <video
-                  ref={videoRef}
-                  src={src}
-                  muted
-                  playsInline
-                  className="w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  onMouseEnter={() => videoRef.current?.play()}
-                  onMouseLeave={() => videoRef.current?.pause()}
-                  onEnded={() => setShowPopup(true)}
-                />
-              </Link>
-              <AnimatePresence>
-                {showPopup && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 50 }}
-                    transition={{ duration: 0.5 }}
-                    className="absolute inset-0 bg-black/80 flex flex-col justify-center items-center text-white p-4 z-10"
-                  >
-                    <img src={productImage} alt={name} className="w-32 h-32 object-cover rounded mb-4" />
-                    <h3 className="text-xl font-bold mb-2">{name}</h3>
-                    <p className="mb-4">{price}</p>
-                    <Link href={`/talent${id}`} className="bg-pink-500 text-white px-4 py-2 rounded-full hover:bg-pink-600 transition" onClick={playClickSound}>Beli Sekarang</Link>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+        {[1, 2, 3].map(id => (
+          <div key={id} className="rounded-xl overflow-hidden shadow border">
+            <Link href={`/talent${id}`}>
+              <video
+                src={`/talent${id}.mp4`}
+                muted
+                loop
+                playsInline
+                className="w-full object-cover transition-transform duration-300 hover:scale-105"
+              />
+            </Link>
+            <div className="bg-white text-black text-center py-3">
+              <h3 className="font-bold">SHOP TALENT {id}</h3>
+              <p className="text-sm">Klik untuk lihat produk</p>
             </div>
-          )
-        })}
+          </div>
+        ))}
       </section>
 
-      {/* Footer */}
       <footer className="bg-neutral-900 text-white px-6 py-10 mt-auto">
         <div className="flex flex-col md:flex-row justify-between">
           <div className="text-left md:w-1/2">
             <h3 className="text-xl font-bold mb-4">WUTHERING WAVES MERCHANDISE STORE NON OFFICIAL</h3>
             <p className="text-sm leading-relaxed max-w-md">
-              Wuthering Wave adalah game rpg bercerita tentang rover yang memulai perjalananya kembali sekali lagi untuk mencapai ending yang terbaik.
-              wuwa ini dilengkapi dengan mekanik combat dan eksplorasi yang asik serta desain karakter yang menggunakan unreal engine 4 sehingga desain karakter lebih bagus. 
+              Wuthering Wave adalah game RPG bercerita tentang rover yang memulai perjalanannya kembali untuk mencapai ending terbaik.
+              Dengan mekanik combat dan eksplorasi yang seru, serta desain karakter ciamik dari Unreal Engine 4.
             </p>
           </div>
           <div className="text-right md:w-1/2 mt-6 md:mt-0">
