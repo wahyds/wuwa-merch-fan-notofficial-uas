@@ -2,6 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 import { logoutUser } from '@/utils/logout'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -15,6 +16,33 @@ export default function DashboardPage() {
   const bgmRef = useRef(null)
   const clickSoundRef = useRef(null)
   const [isMusicPlaying, setIsMusicPlaying] = useState(true)
+
+  const talents = [
+    {
+      id: 0,
+      src: '/talent1.mp4',
+      productImage: '/product1.jpg',
+      name: 'Tas Phoebe',
+      price: 'Rp 350.000'
+    },
+    {
+      id: 1,
+      src: '/talent2.mp4',
+      productImage: '/product2.jpg',
+      name: 'Mousepad Romantic Carlotta Packed',
+      price: 'Rp 700.000'
+    },
+    {
+      id: 2,
+      src: '/talent3.mp4',
+      productImage: '/product3.jpg',
+      name: 'Figure Carthethyia Eksklusif',
+      price: 'Rp 1.550.000'
+    }
+  ]
+
+  const videoRefs = useRef([])
+  const [showPopups, setShowPopups] = useState(Array(talents.length).fill(false))
 
   useEffect(() => {
     const raw = localStorage.getItem('user_data')
@@ -64,7 +92,7 @@ export default function DashboardPage() {
   }
 
   const NavButton = ({ href, icon, label }) => (
-    <Link href={href} onClick={playClickSound} className="flex items-center gap-2 border px-3 py-2 rounded shadow hover:bg-gray-100 transition text-sm">
+    <Link href={href} className="flex items-center gap-2 border px-3 py-2 rounded shadow hover:bg-gray-100 transition text-sm" onClick={playClickSound}>
       <span>{icon}</span>
       <span>{label}</span>
     </Link>
@@ -75,6 +103,7 @@ export default function DashboardPage() {
       <audio ref={bgmRef} src="/bgm.mp3" autoPlay loop />
       <audio ref={clickSoundRef} src="/click.mp3" preload="auto" />
 
+      {/* Navbar */}
       <nav className="flex items-center justify-between px-6 py-4 shadow-md bg-white">
         <h1 className="text-2xl font-bold text-red-600">WUTHERING WAVES</h1>
         <div className="md:hidden">
@@ -92,11 +121,11 @@ export default function DashboardPage() {
               <NavButton href="/riwayat" icon="📜" label="Riwayat" />
               <NavButton href="/lacak" icon="📦" label="Lacak" />
               <NavButton href="/chat" icon="💬" label="Pesan" />
-              {isAdmin && <NavButton href="/admin/adminpage" icon="⚙️" label="Admin Panel" />}
+              {isAdmin && <NavButton href="/adminpage" icon="⚙️" label="Admin Panel" />}
               <button onClick={logoutUser} className="text-red-600 font-semibold ml-2">Logout</button>
               {userPhoto && (
                 <Link href="/profile">
-                  <img src={userPhoto} alt="Foto Profil" className="w-12 h-12 rounded-full border object-cover ml-4 hover:ring-2 ring-pink-400 transition" />
+                  <Image src={userPhoto} alt="Foto Profil" width={48} height={48} className="rounded-full border object-cover ml-4 hover:ring-2 ring-pink-400 transition" />
                 </Link>
               )}
             </>
@@ -109,6 +138,7 @@ export default function DashboardPage() {
         </div>
       </nav>
 
+      {/* Mobile Dropdown */}
       {menuOpen && (
         <div className="md:hidden flex flex-col bg-white px-6 py-2 space-y-2 border-b">
           <NavButton href="/cart" icon="🛒" label="Keranjang" />
@@ -121,17 +151,6 @@ export default function DashboardPage() {
               <NavButton href="/chat" icon="💬" label="Pesan" />
               {isAdmin && <NavButton href="/admin/adminpage" icon="⚙️" label="Admin Panel" />}
               <button onClick={logoutUser} className="text-left text-red-600 font-semibold">Logout</button>
-              {userPhoto && (
-                <div className="mt-4 text-center">
-                  <Link href="/profile">
-                    <img
-                      src={userPhoto}
-                      alt="Foto Profil"
-                      className="w-20 h-20 mx-auto rounded-full border object-cover"
-                    />
-                  </Link>
-                </div>
-              )}
             </>
           ) : (
             <>
@@ -142,6 +161,7 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* Banner */}
       <section className="relative text-white text-center">
         <video src="/bg.mp4" autoPlay muted loop playsInline className="w-full h-[300px] object-cover" />
         <div className="absolute inset-0 bg-black/50 flex flex-col justify-center items-center">
@@ -151,41 +171,62 @@ export default function DashboardPage() {
         </div>
       </section>
 
+      {/* Produk Talent */}
       <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-6">
-        {[1, 2, 3].map(id => (
-          <div key={id} className="rounded-xl overflow-hidden shadow border">
-            <Link href={`/talent${id}`}>
+        {talents.map(({ id, src, productImage, name, price }) => (
+          <div key={id} className="relative group rounded-xl overflow-hidden shadow border">
+            <Link href={`/talent${id + 1}`} onClick={playClickSound}>
               <video
-                src={`/talent${id}.mp4`}
+                ref={el => videoRefs.current[id] = el}
+                src={src}
                 muted
-                loop
                 playsInline
-                className="w-full object-cover transition-transform duration-300 hover:scale-105"
+                className="w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                onMouseEnter={() => videoRefs.current[id]?.play()}
+                onMouseLeave={() => videoRefs.current[id]?.pause()}
+                onEnded={() => {
+                  const updated = [...showPopups]
+                  updated[id] = true
+                  setShowPopups(updated)
+                }}
               />
             </Link>
-            <div className="bg-white text-black text-center py-3">
-              <h3 className="font-bold">SHOP TALENT {id}</h3>
-              <p className="text-sm">Klik untuk lihat produk</p>
-            </div>
+            <AnimatePresence>
+              {showPopups[id] && (
+                <motion.div
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 50 }}
+                  transition={{ duration: 0.5 }}
+                  className="absolute inset-0 bg-black/80 flex flex-col justify-center items-center text-white p-4 z-10"
+                >
+                  <Image src={productImage} alt={name} width={128} height={128} className="rounded mb-4 object-cover" />
+                  <h3 className="text-xl font-bold mb-2">{name}</h3>
+                  <p className="mb-4">{price}</p>
+                  <Link href={`/talent${id + 1}`} className="bg-pink-500 text-white px-4 py-2 rounded-full hover:bg-pink-600 transition" onClick={playClickSound}>Beli Sekarang</Link>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         ))}
       </section>
 
+      {/* Footer */}
       <footer className="bg-neutral-900 text-white px-6 py-10 mt-auto">
         <div className="flex flex-col md:flex-row justify-between">
           <div className="text-left md:w-1/2">
             <h3 className="text-xl font-bold mb-4">WUTHERING WAVES MERCHANDISE STORE NON OFFICIAL</h3>
             <p className="text-sm leading-relaxed max-w-md">
-              Wuthering Wave adalah game RPG bercerita tentang rover yang memulai perjalanannya kembali untuk mencapai ending terbaik.
-              Dengan mekanik combat dan eksplorasi yang seru, serta desain karakter ciamik dari Unreal Engine 4.
+              Wuthering Wave adalah game RPG bercerita tentang Rover yang memulai perjalanannya kembali sekali lagi untuk mencapai ending terbaik.
+              Game ini dilengkapi dengan mekanik combat dan eksplorasi yang asik serta desain karakter keren dari Unreal Engine 4.
             </p>
           </div>
           <div className="text-right md:w-1/2 mt-6 md:mt-0">
             <h3 className="text-xl font-bold mb-4">Ikuti Kami</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:underline">Twitter</a></li>
-              <li><a href="#" className="hover:underline">Instagram</a></li>
-              <li><a href="#" className="hover:underline">YouTube</a></li>
+              <li><a href="https://x.com/yonri_1988" className="hover:underline">Twitter</a></li>
+              <li><a href="https://www.instagram.com/yonri1988?igsh=cnc2MTFvcTF3eDk5" className="hover:underline">Instagram</a></li>
+              <li><a href="https://www.youtube.com/@WutheringWaves" className="hover:underline">YouTube</a></li>
               <li><a href="#" className="hover:underline">Discord</a></li>
             </ul>
           </div>
