@@ -1,11 +1,10 @@
-// 💖 Talent2Page.js - Carlotta (Pink to White Gradient with Banner Background)
-
 'use client'
 import { useEffect, useState } from 'react'
 import InnerImageZoom from 'react-inner-image-zoom'
 import 'react-inner-image-zoom/lib/InnerImageZoom/styles.css'
 import { useRouter } from 'next/navigation'
 
+// Default Produk
 const defaultProducts = [
   { id: 1, name: 'Kaos Eksklusif Carlotta', price: 150000, image: '/kaos2.jpeg', stock: 10 },
   { id: 2, name: 'Acrylic Stand Carlotta', price: 110000, image: '/stand2.jpg', stock: 3 },
@@ -58,41 +57,61 @@ export default function Talent2Page() {
         ← Kembali ke Dashboard
       </button>
 
+      {/* Banner */}
       <div
         className="relative w-full h-40 rounded-xl overflow-hidden flex items-center justify-center shadow-lg mb-8"
-        style={{ backgroundImage: 'url(banners/banner2.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}
+        style={{ backgroundImage: 'url(/banners/banner2.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}
       >
         <h1 className="text-white text-4xl font-extrabold drop-shadow-lg bg-black/50 px-6 py-3 rounded-xl">
           💖 Carlotta Merchandise
         </h1>
       </div>
 
+      {/* Grid Produk */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-6">
         {products.map((p, i) => (
           <div key={p.id} className="bg-white shadow rounded-2xl p-5 flex flex-col">
             <div className="rounded-xl overflow-hidden mb-4">
-              <InnerImageZoom src={p.image} zoomSrc={p.image} zoomType="hover" zoomScale={1.2} className="w-full" />
+              <ZoomImageSafe src={p.image} />
             </div>
             <div className="bg-pink-600 text-white text-lg font-bold text-center px-2 py-2 rounded mb-2 drop-shadow">
               {p.name}
             </div>
             <p className="text-red-600 font-bold">Rp {p.price.toLocaleString()}</p>
-            <p className="text-sm text-gray-600 mb-2">Stok: {p.stock > 0 ? p.stock : <span className="text-red-500">Habis</span>}</p>
+            <p className="text-sm text-gray-600 mb-2">
+              Stok: {p.stock > 0 ? p.stock : <span className="text-red-500">Habis</span>}
+            </p>
 
             {isAdmin && (
               <div className="space-y-2 text-sm mb-3">
                 <div className="flex items-center gap-2">
                   <label>Harga:</label>
-                  <input type="number" value={p.price} onChange={(e) => handleAdminChange(i, 'price', e.target.value)} className="border px-2 py-1 rounded w-full" />
+                  <input
+                    type="number"
+                    value={p.price}
+                    onChange={(e) => handleAdminChange(i, 'price', e.target.value)}
+                    className="border px-2 py-1 rounded w-full"
+                  />
                 </div>
                 <div className="flex items-center gap-2">
                   <label>Stok:</label>
-                  <input type="number" value={p.stock} onChange={(e) => handleAdminChange(i, 'stock', e.target.value)} className="border px-2 py-1 rounded w-full" />
+                  <input
+                    type="number"
+                    value={p.stock}
+                    onChange={(e) => handleAdminChange(i, 'stock', e.target.value)}
+                    className="border px-2 py-1 rounded w-full"
+                  />
                 </div>
               </div>
             )}
 
-            <button onClick={() => addToCart(p)} disabled={p.stock <= 0} className={`mt-auto px-4 py-2 rounded-xl text-white transition ${p.stock > 0 ? 'bg-red-500 hover:bg-red-600' : 'bg-gray-400 cursor-not-allowed'}`}>
+            <button
+              onClick={() => addToCart(p)}
+              disabled={p.stock <= 0}
+              className={`mt-auto px-4 py-2 rounded-xl text-white transition ${
+                p.stock > 0 ? 'bg-red-500 hover:bg-red-600' : 'bg-gray-400 cursor-not-allowed'
+              }`}
+            >
               🛒 Tambah ke Keranjang
             </button>
           </div>
@@ -107,5 +126,30 @@ export default function Talent2Page() {
         </div>
       )}
     </div>
+  )
+}
+
+// ✅ Komponen Gambar Aman untuk Zoom (menghindari error NaN)
+function ZoomImageSafe({ src }) {
+  const [loaded, setLoaded] = useState(false)
+
+  return (
+    <>
+      <img
+        src={src}
+        alt="preview"
+        className="w-full rounded hidden"
+        onLoad={() => setLoaded(true)}
+      />
+      {loaded && (
+        <InnerImageZoom
+          src={src}
+          zoomSrc={src}
+          zoomType="hover"
+          zoomScale={1.2}
+          className="w-full"
+        />
+      )}
+    </>
   )
 }

@@ -80,13 +80,7 @@ export default function Talent1Page() {
         {products.map((item, i) => (
           <div key={item.id} className="bg-white shadow-md rounded-2xl p-5 flex flex-col">
             <div className="rounded-xl overflow-hidden mb-4">
-              <InnerImageZoom
-                src={item.image}
-                zoomSrc={item.image}
-                zoomType="hover"
-                zoomScale={1.2}
-                className="w-full"
-              />
+              <ZoomImageSafe src={item.image} />
             </div>
 
             <h3 className="bg-blue-600 text-white text-lg font-bold text-center px-3 py-2 rounded mb-2 drop-shadow">
@@ -148,5 +142,30 @@ export default function Talent1Page() {
         </div>
       )}
     </div>
+  )
+}
+
+// Komponen untuk aman render gambar zoom setelah onLoad
+function ZoomImageSafe({ src }) {
+  const [loaded, setLoaded] = useState(false)
+
+  return (
+    <>
+      <img
+        src={src}
+        alt="preview"
+        className="w-full rounded hidden"
+        onLoad={() => setLoaded(true)}
+      />
+      {loaded && (
+        <InnerImageZoom
+          src={src}
+          zoomSrc={src}
+          zoomType="hover"
+          zoomScale={1.2}
+          className="w-full"
+        />
+      )}
+    </>
   )
 }
