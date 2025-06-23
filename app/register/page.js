@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import ReCAPTCHA from 'react-google-recaptcha'
 import { signIn } from 'next-auth/react'
 
+const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''
+
 export default function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -21,7 +23,6 @@ export default function RegisterPage() {
       return alert('Harap centang captcha dulu')
     }
 
-    // Simpan akun ke localStorage DENGAN ROLE
     const newUser = { email, password, role }
     localStorage.setItem('user', JSON.stringify(newUser))
 
@@ -31,9 +32,13 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-full max-w-md">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-6 rounded shadow-md w-full max-w-md"
+      >
         <h2 className="text-xl font-bold mb-4 text-center">Daftar Akun</h2>
- <h3 className="font-semibold mb-2">Email</h3>
+
+        <label className="font-semibold mb-2 block">Email</label>
         <input
           type="email"
           placeholder="Email"
@@ -42,7 +47,8 @@ export default function RegisterPage() {
           required
           className="w-full p-2 border rounded mb-4"
         />
-        <h3 className="font-semibold mb-2">Password</h3>
+
+        <label className="font-semibold mb-2 block">Password</label>
         <input
           type="password"
           placeholder="Kata Sandi"
@@ -52,10 +58,9 @@ export default function RegisterPage() {
           className="w-full p-2 border rounded mb-4"
         />
 
-        {/* Tampilkan CAPTCHA jika bukan admin */}
-        {!(email === 'admin@gmail.com' && password === '12345') && (
+        {!isAdmin(email, password) && (
           <ReCAPTCHA
-            sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+            sitekey={RECAPTCHA_SITE_KEY}
             onChange={(val) => setCaptchaValue(val)}
           />
         )}
@@ -73,9 +78,16 @@ export default function RegisterPage() {
         </button>
 
         <p className="text-sm text-center text-gray-500 mt-4">
-          Sudah punya akun? <a href="/login" className="text-blue-500 underline">Masuk</a>
+          Sudah punya akun?{' '}
+          <a href="/login" className="text-blue-500 underline">
+            Masuk
+          </a>
         </p>
       </form>
     </div>
   )
+}
+
+function isAdmin(email, password) {
+  return email === 'admin@gmail.com' && password === '12345'
 }

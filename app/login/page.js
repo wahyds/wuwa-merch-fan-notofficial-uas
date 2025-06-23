@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { useSession, signIn } from 'next-auth/react'
 import ReCAPTCHA from 'react-google-recaptcha'
 
+const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''
+
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -24,8 +26,8 @@ export default function LoginPage() {
   const handleManualLogin = (e) => {
     e.preventDefault()
 
-    // Admin login (tanpa captcha)
-    if (email === 'admin@gmail.com' && password === '12345') {
+    const isAdmin = email === 'admin@gmail.com' && password === '12345'
+    if (isAdmin) {
       localStorage.setItem('user_data', JSON.stringify({ email }))
       alert('Login Admin berhasil!')
       router.push('/Dashboard')
@@ -85,11 +87,10 @@ export default function LoginPage() {
           className="w-full p-2 border rounded mb-4"
         />
 
-        {/* CAPTCHA hanya untuk user biasa, bukan admin */}
-        {!(email === 'admin@gmail.com' && password === '12345') && (
+        {!isAdmin(email, password) && (
           <div className="mb-4">
             <ReCAPTCHA
-              sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+              sitekey={RECAPTCHA_SITE_KEY}
               onChange={(value) => setCaptchaValue(value)}
             />
           </div>
@@ -104,4 +105,8 @@ export default function LoginPage() {
       </form>
     </div>
   )
+}
+
+function isAdmin(email, password) {
+  return email === 'admin@gmail.com' && password === '12345'
 }
